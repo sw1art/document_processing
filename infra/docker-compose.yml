@@ -1,0 +1,76 @@
+services:
+  postgres:
+    image: postgres:17
+    environment:
+      POSTGRES_DB: dps
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgrees
+    ports:
+      - "5432:5432"
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+
+  rabbitmq:
+    image: rabbitmq:4.1-management
+    environment:
+      RABBITMQ_DEFAULT_USER: user
+      RABBITMQ_DEFAULT_PASS: password
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+
+  minio:
+    image: minio/minio
+    command: server /data
+    environment:
+      MINIO_ROOT_USER: user
+      MINIO_ROOT_PASSWORD: password
+    ports:
+      - "9001:9000"   # меняем порт на 9001, чтобы VPN не мешал
+    volumes:
+      - minio_data:/data
+
+  api:
+    build:
+      context: ..
+      dockerfile: backend/Dockerfile
+    volumes:
+      - ../backend:/app/backend
+    working_dir: /app/backend
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000
+    ports:
+      - "8000:8000"
+    environment:
+      DATABASE_URL: postgresql+asyncpg://postgres:postgres@postgres:5432/dps
+      RABBITMQ_URL: amqp://user:password@rabbitmq:5672//
+      MINIO_ENDPOINT: minio:9000
+      MINIO_ACCESS_KEY: user
+      MINIO_SECRET_KEY: password
+    depends_on:
+      - postgres
+      - rabbitmq
+      - minio
+
+  worker:
+    build:
+      context: ..
+      dockerfile: worker/Dockerfile
+    volumes:
+      - ../worker:/app/worker
+    working_dir: /app/worker
+    command: celery -A worker worker --loglevel=INFO
+    environment:
+      DATABASE_URL: postgresql+asyncpg://postgres:postgres@postgres:5432/dps
+      RABBITMQ_URL: amqp://user:password@rabbitmq:5672//
+      MINIO_ENDPOINT: minio:9000
+      MINIO_ACCESS_KEY: user
+      MINIO_SECRET_KEY: password
+    depends_on:
+      - api
+      - rabbitmq
+      - postgres
+      - minio
+
+volumes:
+  pg_data:
+  minio_data:

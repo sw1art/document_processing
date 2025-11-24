@@ -1,0 +1,25 @@
+from pydantic import BaseSettings, Field, PostgresDsn
+
+class Settings(BaseSettings):
+    PROJECT_NAME: str = "Document Processing Service"
+    
+    # Database
+    DATABASE_URL: PostgresDsn
+    
+    # RabbitMQ
+    RABBITMQ_URL: str
+    
+    # MinIO/S3
+    MINIO_ENDPOINT: str
+    MINIO_ACCESS_KEY: str
+    MINIO_SECRET_KEY: str
+    MINIO_BUCKET: str = "files"
+
+    # Security
+    SECRET_KEY: str
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 60
+
+    class Config:
+        env_file = "../../config/dev.env"
+
+settings = Settings()
