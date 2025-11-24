@@ -1,5 +1,6 @@
 FROM python:3.13.9-slim
 
+# Рабочая директория
 WORKDIR /app
 
 # Устанавливаем зависимости ОС для Tesseract / LibreOffice / PDF
@@ -15,8 +16,11 @@ RUN apt-get update && apt-get install -y \
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Копируем код
-WORKDIR /app/backend
+# Копируем весь проект
+COPY . /app
+
+# PYTHONPATH для абсолютных импортов backend.*
+ENV PYTHONPATH=/app
 
 # Команда запуска
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+CMD ["uvicorn", "backend.app.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]

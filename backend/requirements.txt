@@ -1,7 +1,8 @@
 fastapi
 uvicorn[standard]
 python-multipart # для загрузки файлов
-pydantic
+pydantic[email]
+pydantic-settings
 SQLAlchemy
 asyncpg # async драйвер Postgres
 alembic

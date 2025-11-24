@@ -13,5 +13,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . /app
 
+# PYTHONPATH для абсолютных импортов worker.*
+ENV PYTHONPATH=/app
+
 # Запуск Celery worker
 CMD ["celery", "-A", "worker", "worker", "--loglevel=INFO"]

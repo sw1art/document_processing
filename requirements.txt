@@ -1,7 +1,8 @@
 fastapi
 uvicorn[standard]
 python-multipart # для загрузки файлов
-pydantic
+pydantic[email]
+pydantic-settings
 SQLAlchemy
 asyncpg # async драйвер Postgres
 alembic
@@ -13,3 +14,4 @@ python-jose[cryptography] # JWT
 celery[redis] # или без [redis], если используем только RabbitMQ
 tesserocr # OCR (Tesseract) для Python
 Pillow # для обработки изображений
+pre-commit # для автоматической проверки кода
