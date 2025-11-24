@@ -1,7 +1,6 @@
 import uuid
-from datetime import datetime
 
-from sqlalchemy import Boolean, Column, DateTime, String
+from sqlalchemy import Boolean, Column, DateTime, String, func
 from sqlalchemy.dialects.postgresql import UUID
 
 from backend.app.db.base import Base
@@ -13,4 +12,12 @@ class User(Base):
     email = Column(String, unique=True, nullable=False)
     hashed_password = Column(String, nullable=False)
     is_active = Column(Boolean, default=True)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(
+        DateTime(timezone=True), server_default=func.now(), nullable=False
+    )
+    updated_at = Column(
+        DateTime(timezone=True),
+        server_default=func.now(),
+        onupdate=func.now(),
+        nullable=False,
+    )

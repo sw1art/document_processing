@@ -6,6 +6,7 @@ __pycache__/
 *.sqlite3
 *.log
 *.cache
+.ruff_cache
 
 # Docker
 *.env
