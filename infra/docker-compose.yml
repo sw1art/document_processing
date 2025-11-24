@@ -4,7 +4,7 @@ services:
     environment:
       POSTGRES_DB: dps
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgrees
+      POSTGRES_PASSWORD: postgres
     ports:
       - "5432:5432"
     volumes:
@@ -40,6 +40,8 @@ services:
     command: uvicorn app.main:app --host 0.0.0.0 --port 8000
     ports:
       - "8000:8000"
+    env_file:
+      - ../config/dev.env
     environment:
       DATABASE_URL: postgresql+asyncpg://postgres:postgres@postgres:5432/dps
       RABBITMQ_URL: amqp://user:password@rabbitmq:5672//
@@ -59,6 +61,8 @@ services:
       - ../worker:/app/worker
     working_dir: /app/worker
     command: celery -A worker worker --loglevel=INFO
+    env_file:
+      - ../config/dev.env
     environment:
       DATABASE_URL: postgresql+asyncpg://postgres:postgres@postgres:5432/dps
       RABBITMQ_URL: amqp://user:password@rabbitmq:5672//

@@ -1,5 +1,5 @@
 from pydantic import PostgresDsn
-from pydantic_settings import BaseSettings
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
@@ -20,9 +20,9 @@ class Settings(BaseSettings):
     # Security
     SECRET_KEY: str
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60
-
-    class Config:
-        env_file = "../../config/dev.env"
+    model_config = SettingsConfigDict(extra="ignore")
+    # class Config:
+    #     env_file = "/app/config/dev.env"
 
 
 settings = Settings()
