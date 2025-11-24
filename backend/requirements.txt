@@ -13,3 +13,4 @@ python-jose[cryptography] # JWT
 celery[redis] # или без [redis], если используем только RabbitMQ
 tesserocr # OCR (Tesseract) для Python
 Pillow # для обработки изображений
+pre-commit # для автоматической проверки кода
