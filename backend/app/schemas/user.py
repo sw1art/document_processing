@@ -1,31 +1,33 @@
-from uuid import UUID
+from datetime import datetime
 
-from pydantic import BaseModel, EmailStr
+from pydantic import UUID4, BaseModel, EmailStr
 
 
-# Входные данные для регистрации
 class UserCreate(BaseModel):
     email: EmailStr
+    username: str
     password: str
 
 
-# Входные данные для логина
 class UserLogin(BaseModel):
     email: EmailStr
     password: str
 
 
-# Ответ с данными пользователя
 class UserRead(BaseModel):
-    id: UUID
+    id: UUID4
     email: EmailStr
-    is_active: bool
+    username: str
+    is_active: bool = True
+    created_at: datetime | None
 
-    class Config:
-        from_attributes = True
+    model_config = {"from_attributes": True}
 
 
-# Токен JWT
 class Token(BaseModel):
     access_token: str
     token_type: str = "bearer"
+
+
+class TokenPayload(BaseModel):
+    sub: datetime

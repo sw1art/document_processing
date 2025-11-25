@@ -18,9 +18,9 @@ class Settings(BaseSettings):
     MINIO_BUCKET: str = "files"
 
     # Security
-    MAX_BCRYPT_BYTES: int = 72
     SECRET_KEY: str
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60
+    ALGORITHM_JWT: str = "HS256"
     model_config = SettingsConfigDict(extra="ignore")
     # class Config:
     #     env_file = "/app/config/dev.env"

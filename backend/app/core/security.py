@@ -1,24 +1,48 @@
 from datetime import datetime, timedelta
+from typing import Any, Dict, Optional
 
-from jose import jwt
-from passlib.context import CryptContext
+import jwt
+from pwdlib import PasswordHash
 
 from backend.app.core.config import settings
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+password_hash = PasswordHash.recommended()
 
 
-def hash_password(password: str) -> str:
-    return pwd_context.hash(password)
+def get_password_hash(password: str) -> str:
+    return password_hash.hash(password)
 
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
-    return pwd_context.verify(plain_password, hashed_password)
+    return password_hash.verify(plain_password, hashed_password)
 
 
+# JWT utils
 def create_access_token(
-    subject: str, expires_minutes: int = settings.ACCESS_TOKEN_EXPIRE_MINUTES
+    subject: str | int, expires_delta: Optional[timedelta] = None
 ) -> str:
-    expire = datetime.utcnow() + timedelta(minutes=expires_minutes)
-    to_encode = {"exp": expire, "sub": str(subject)}
-    return jwt.encode(to_encode, settings.SECRET_KEY, algorithm="HS256")
+    """
+    subject: typically user id (UUID as str or int)
+    returns: JWT token (str)
+    """
+    now = datetime.utcnow()
+    if expires_delta:
+        expire = now + expires_delta
+    else:
+        expire = now + timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
+
+    payload: Dict[str, Any] = {
+        "sub": str(subject),
+        "iat": now,
+        "exp": expire,
+    }
+    token = jwt.encode(payload, settings.SECRET_KEY, algorithm=settings.ALGORITHM_JWT)
+    return token
+
+
+def decode_access_token(token: str) -> Dict[str, Any]:
+    """
+    Raises jwt.PyJWTError on invalid token.
+    """
+    payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
+    return payload
