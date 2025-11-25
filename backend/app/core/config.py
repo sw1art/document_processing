@@ -18,6 +18,7 @@ class Settings(BaseSettings):
     MINIO_BUCKET: str = "files"
 
     # Security
+    MAX_BCRYPT_BYTES: int = 72
     SECRET_KEY: str
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60
     model_config = SettingsConfigDict(extra="ignore")

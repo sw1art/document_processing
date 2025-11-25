@@ -6,7 +6,7 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
     ports:
-      - "5432:5432"
+      - "5433:5432" # меняем порт на 5433, чтобы локальный postgresql не мешал
     volumes:
       - pg_data:/var/lib/postgresql/data
 
@@ -26,7 +26,7 @@ services:
       MINIO_ROOT_USER: user
       MINIO_ROOT_PASSWORD: password
     ports:
-      - "9001:9000"   # меняем порт на 9001, чтобы VPN не мешал
+      - "9001:9000" # меняем порт на 9001, чтобы VPN не мешал
     volumes:
       - minio_data:/data
 

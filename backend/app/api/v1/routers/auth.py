@@ -1,44 +1,35 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from backend.app.api.v1.deps import get_current_user
-from backend.app.core.security import create_access_token
 from backend.app.db.session import get_db
-from backend.app.models.user import User
 from backend.app.schemas.user import Token, UserCreate, UserLogin, UserRead
-from backend.app.services.user_service import UserService
+from backend.app.services.user_service import AuthService
 
 router = APIRouter()
 
 
 # Эндпоинт регистрации
 @router.post("/register", response_model=UserRead)
-async def register(user_in: UserCreate, db: AsyncSession = Depends(get_db)):
-    service = UserService(db)
-    # Проверяем, есть ли уже пользователь
-    existing_user = await service.authenticate_user(user_in.email, user_in.password)
-    if existing_user:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST, detail="User already exists"
-        )
-    user = await service.create_user(user_in.email, user_in.password)
-    return user
+async def register(data: UserCreate, db: AsyncSession = Depends(get_db)):
+    try:
+        user = await AuthService.register(data, db)
+        return user
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
 
 
 # Эндпоинт логина
 @router.post("/login", response_model=Token)
-async def login(form_data: UserLogin, db: AsyncSession = Depends(get_db)):
-    service = UserService(db)
-    user = await service.authenticate_user(form_data.email, form_data.password)
-    if not user:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials"
-        )
-    token = create_access_token({"sub": str(user.id)})
-    return Token(access_token=token)
+async def login(data: UserLogin, db: AsyncSession = Depends(get_db)):
+    try:
+        token = await AuthService.authenticate(data, db)
+        return Token(access_token=token)
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Invalid credentials")
 
 
 # Защищенный эндпоинт для получения пользователя
 @router.get("/me", response_model=UserRead)
-async def read_current_user(current_user: User = Depends(get_current_user)):
+async def me(current_user=Depends(get_current_user)):
     return current_user

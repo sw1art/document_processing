@@ -8,7 +8,8 @@ asyncpg # async драйвер Postgres
 alembic
 python-dotenv
 boto3 # для работы с MinIO/S3
-passlib[bcrypt] # хеширование паролей
+bcrypt==4.0.1 # Хеширование паролей со стабильной версией
+passlib[bcrypt]==1.7.4 # Хеширование паролей со стабильной версией
 python-jose[cryptography] # JWT
 # httpx # async HTTP client.
 celery[redis] # или без [redis], если используем только RabbitMQ
