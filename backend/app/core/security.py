@@ -2,11 +2,13 @@ from datetime import datetime, timedelta
 from typing import Any, Dict, Optional
 
 import jwt
+from fastapi.security import OAuth2PasswordBearer
 from pwdlib import PasswordHash
 
 from backend.app.core.config import settings
 
 password_hash = PasswordHash.recommended()
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/token")
 
 
 def get_password_hash(password: str) -> str:
@@ -44,5 +46,7 @@ def decode_access_token(token: str) -> Dict[str, Any]:
     """
     Raises jwt.PyJWTError on invalid token.
     """
-    payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
+    payload = jwt.decode(
+        token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM_JWT]
+    )
     return payload

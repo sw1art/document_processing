@@ -1,15 +1,19 @@
 from datetime import timedelta
 
-from fastapi import HTTPException, status
+from fastapi import Depends, HTTPException, status
+from jwt.exceptions import PyJWTError
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from backend.app.core.config import settings
 from backend.app.core.security import (
     create_access_token,
+    decode_access_token,
     get_password_hash,
+    oauth2_scheme,
     verify_password,
 )
+from backend.app.db.session import get_db
 from backend.app.models.user import User
 from backend.app.schemas.user import UserCreate
 
@@ -63,13 +67,26 @@ class AuthService:
         )
 
     @staticmethod
-    async def get_current_user(user_id: str, db: AsyncSession) -> User:
-        from sqlalchemy import select
+    async def get_current_user(
+        token: str = Depends(oauth2_scheme),
+        db: AsyncSession = Depends(get_db),
+    ):
+        try:
+            payload = decode_access_token(token)
+            user_id: str = payload.get("sub")
+        except PyJWTError:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid token",
+            )
 
         result = await db.execute(select(User).where(User.id == user_id))
-        user = result.scalars().first()
+        user = result.scalar_one_or_none()
+
         if not user:
             raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="User not found",
             )
+
         return user
